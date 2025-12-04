@@ -1,0 +1,5 @@
+aga una funcion que haga lo siguiente:
+
+Debera imprimir la ruta en la que estamos ubicados.
+Identificar dentro de la ruta ubicada, cuales son archivos.
+Identificar la extension de cada archivo y contabilizar la cantidad que existe por cada extension.
