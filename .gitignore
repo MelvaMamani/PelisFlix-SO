@@ -1,0 +1,9 @@
+.vs/
+node_modules/
+.env
+
+
+# Pero permitir la carpeta de tu proyecto
+!NetflixCasero/
+!NetflixCasero/**
+

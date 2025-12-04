@@ -1,0 +1,84 @@
+version: "3.8"
+
+networks:
+  home_media_net:
+    driver: bridge
+
+services:
+  mariadb:
+    image: mariadb:10.6
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=psmariadb   # CAMBIA ESTA CONTRASEÑA
+      - MARIADB_DATABASE=jellyseerr
+      - MARIADB_USER=jellyuser
+      - MARIADB_PASSWORD=psjelly            # CAMBIA ESTA CONTRASEÑA
+    volumes:
+      - C:/srv/mariadb/data:/var/lib/mysql
+    ports:
+      - "3306:3306"   # expone localmente para backup/inspección
+    networks:
+      - home_media_net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+  jellyfin:
+    image: linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    environment:
+      - TZ=America/Lima
+    volumes:
+      - C:/srv/jellyfin/config:/config
+      - C:/srv/jellyfin/media:/media
+    ports:
+      - "8096:8096"
+    networks:
+      - home_media_net
+    # Para asegurar que Docker Desktop aplique límites, incluimos ambas formas:
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+    # Opcional: algunos motores de compose no aplican 'deploy' en modo compose; si quieres usar
+    # limitations inmediatas usa 'cpus' y 'mem_limit' (legacy) — incluidos abajo:
+    cpus: "1.0"
+    mem_limit: 1g
+
+  jellyseerr:
+    image: ghcr.io/fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: unless-stopped
+    environment:
+      - TZ=America/Lima
+      - DATABASE_CLIENT=mysql
+      - DATABASE_HOST=mariadb
+      - DATABASE_PORT=3306
+      - DATABASE_USER=jellyuser
+      - DATABASE_PASSWORD=psjelly
+      - DATABASE_NAME=jellyseerr
+    volumes:
+      - C:/srv/jellyseerr/config:/app/config
+    ports:
+      - "5055:5055"
+    networks:
+      - home_media_net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
